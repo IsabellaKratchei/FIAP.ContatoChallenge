@@ -13,10 +13,10 @@ namespace FIAP.ContatoChallenge.Repository
           this._bdContext = bdContext;
       }
 
-      public RegiaoModel BuscarPorNum(int num)
-      {
-          return _bdContext.DDDs.FirstOrDefault(x => x.Num_DDD == num);
-      }
+      //public RegiaoModel BuscarPorNum(int num)
+      //{
+      //    return _bdContext.DDDs.FirstOrDefault(x => x.DDD == num);
+      //}
 
   }
 }

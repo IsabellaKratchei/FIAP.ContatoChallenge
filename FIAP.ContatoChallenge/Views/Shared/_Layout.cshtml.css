@@ -39,10 +39,26 @@ button.accept-policy {
   line-height: inherit;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+}
+
 .footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #f8f9fa; /* ajuste conforme necessário */
+    padding: 1rem;
+    text-align: center;
+    z-index: 1000; /* para garantir que o rodapé fique acima de outros elementos */
 }

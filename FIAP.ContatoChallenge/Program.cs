@@ -1,4 +1,9 @@
-namespace FIAP.ContatoChallenge
+using FIAP.ContatoChallenge.Data;
+using FIAP.ContatoChallenge.Repository;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+
+namespace FIAP.ContatoTechChallenge
 {
     public class Program
     {
@@ -6,15 +11,20 @@ namespace FIAP.ContatoChallenge
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddEntityFrameworkSqlServer()
+                    .AddDbContext<BDContext>(o=> o.UseSqlServer(@"Server=BRUNO_PC\SQLEXPRESS;Database=FIAP;Trusted_Connection=True;TrustServerCertificate=true;"));
+            builder.Services.AddScoped<IContatoRepository, ContatoRepository>();
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler(" / Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }

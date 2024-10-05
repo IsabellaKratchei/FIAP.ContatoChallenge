@@ -13,10 +13,10 @@ namespace FIAP.ContatoChallenge.Controllers
        _regiaoRepository = regiaoRepository;
     }
 
-    public IActionResult BuscarDDD(int num)
-    {
-      RegiaoModel ddd = _regiaoRepository.BuscarPorNum(num);
-      return View(ddd);
-    }
+    //public IActionResult BuscarDDD(int num)
+    //{
+    //  RegiaoModel ddd = _regiaoRepository.BuscarPorNum(num);
+    //  return View(ddd);
+    //}
   }
 }

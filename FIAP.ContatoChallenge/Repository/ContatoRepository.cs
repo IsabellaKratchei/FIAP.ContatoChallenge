@@ -6,62 +6,93 @@ using System;
 
 namespace FIAP.ContatoChallenge.Repository
 {
-  public class ContatoRepository : IContatoRepository
-  {
-      private readonly BDContext _bdContext;
+    public class ContatoRepository : IContatoRepository
+    {
+        private readonly BDContext _bdContext;
 
-      public ContatoRepository(BDContext bdContext)
-      {
-          this._bdContext = bdContext;
-      }
+        public ContatoRepository(BDContext bdContext)
+        {
+            this._bdContext = bdContext;
+        }
 
-      public ContatoModel BuscarPorId(int id)
-      {
-          return _bdContext.Contatos.FirstOrDefault(x => x.Id == id);
-      }
+        public ContatoModel BuscarPorId(int id)
+        {
+            return _bdContext.Contatos
+              .FirstOrDefault(x => x.Id == id);
+            //return _bdContext.Contatos.FirstOrDefault(x => x.Id == id);
+        }
 
-      public List<ContatoModel> BuscarTodos()
-      {
-          return _bdContext.Contatos.ToList();
-      }
+        public List<ContatoModel> BuscarTodos()
+        {
+            return _bdContext.Contatos.ToList();
+        }
 
-      public ContatoModel Adicionar(ContatoModel contato)
-      {
-      //gravar o contato no banco de dado
-          var aux = Convert.ToUInt32(contato.Telefone.Substring(0, 2));
-          var ddd=_bdContext.DDDs.FirstOrDefault(x => x.Num_DDD == aux);
-          //contato.Regiao = ddd.Estado_DDD+" - "+ddd.Regiao_DDD;
-          _bdContext.Contatos.Add(contato);
-          _bdContext.SaveChanges();
+        public async Task<ContatoModel> AdicionarAsync(ContatoModel contato)
+        {
+            try
+            {
+                // Consultar a região correspondente ao DDD fornecido
+                RegiaoModel regiao = await _bdContext.DDDs
+                    .FirstOrDefaultAsync(x => x.DDD == contato.DDD);
 
-          return contato;
-      }
+                // Se a região não for encontrada, pode lançar uma exceção ou tratar conforme necessário
+                if (regiao == null)
+                {
+                    throw new Exception("DDD não encontrado.");
+                }
 
-      public ContatoModel Editar(ContatoModel contato)
-      {
-          ContatoModel contatoBD = BuscarPorId(contato.Id);
-          if (contatoBD == null) throw new System.Exception("Houve um erro na atualizaçao do contato!");
+                // Atribuir a região ao contato
+                contato.Regiao = regiao.Regiao;
 
-          contatoBD.Nome = contato.Nome;
-          contatoBD.Email = contato.Email;
-          contatoBD.Telefone = contato.Telefone;
+                // Gravar o contato no banco de dados
+                await _bdContext.Contatos.AddAsync(contato);
+                await _bdContext.SaveChangesAsync();
 
-          var aux = Convert.ToUInt32(contatoBD.Telefone.Substring(0, 2));
-          var ddd = _bdContext.DDDs.FirstOrDefault(x => x.Num_DDD == aux);
-          //contatoBD.Regiao = ddd.Estado_DDD + " - " + ddd.Regiao_DDD;
+                return contato;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Houve um erro ao adicionar o contato: " + ex.Message);
+            }
+        }
 
-          _bdContext.Contatos.Update(contatoBD);
-          _bdContext.SaveChanges();
-          return contatoBD;
-      }
+        public ContatoModel Editar(ContatoModel contato)
+        {
+            ContatoModel contatoBD = BuscarPorId(contato.Id);
+            if (contatoBD == null) throw new System.Exception("Houve um erro na atualizaçao do contato!");
 
-      public bool Apagar(int id)
-      {
-          ContatoModel contatoBD = BuscarPorId(id);
-          if (contatoBD == null) throw new System.Exception("Houve um erro na exclusao do contato!");
-          _bdContext.Contatos.Remove(contatoBD);
-          _bdContext.SaveChanges();
-          return true;
-      }
-  }
+            contatoBD.Nome = contato.Nome;
+            contatoBD.Email = contato.Email;
+            contatoBD.DDD = contato.DDD;
+            contatoBD.Telefone = contato.Telefone;
+
+            try
+            {
+                _bdContext.Contatos.Update(contatoBD);
+                _bdContext.SaveChangesAsync();
+                return contatoBD;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Houve um erro ao editar o contato:" + ex.Message);
+            }
+        }
+
+        public bool Apagar(int id)
+        {
+            ContatoModel contatoBD = BuscarPorId(id);
+            if (contatoBD == null) throw new System.Exception("Houve um erro na exclusao do contato!");
+
+            try
+            {
+                _bdContext.Contatos.Remove(contatoBD);
+                _bdContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Houve um erro ao apagar o contato:" + ex.Message);
+            }
+        }
+    }
 }

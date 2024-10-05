@@ -13,5 +13,13 @@ namespace FIAP.ContatoChallenge.Data
     public DbSet<ContatoModel> Contatos { get; set; }
 
     public DbSet<RegiaoModel> DDDs { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            //modelBuilder.Entity<ContatoModel>()
+            //    .HasOne(c => c.DDD)
+            //    .WithMany(d => d.Contatos)
+            //    .HasForeignKey(c => c.DDDId);
+        }
   }
 }

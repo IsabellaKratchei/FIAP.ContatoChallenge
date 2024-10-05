@@ -4,7 +4,7 @@ namespace FIAP.ContatoChallenge.Repository
 {
   public interface IContatoRepository
   {
-    ContatoModel Adicionar(ContatoModel contato);
+    Task<ContatoModel> AdicionarAsync(ContatoModel contato);
     ContatoModel BuscarPorId(int id);
     List<ContatoModel> BuscarTodos();
     ContatoModel Editar(ContatoModel contato);

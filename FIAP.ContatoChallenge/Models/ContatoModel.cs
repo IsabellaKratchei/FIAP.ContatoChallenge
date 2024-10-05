@@ -15,5 +15,10 @@ namespace FIAP.ContatoChallenge.Models
     [Required(ErrorMessage = "Digite o celular do contato")]
     [Phone]
     public string Telefone { get; set; }
+    [Required(ErrorMessage = "Digite o DDD do telefone do contato")]
+    [ValidateNever]
+    public string Regiao { get; set; }
+    public string DDD { get; set; }
+
   }
 }

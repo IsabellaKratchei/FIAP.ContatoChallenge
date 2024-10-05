@@ -37,11 +37,11 @@ namespace FIAP.ContatoChallenge.Controllers
     }
 
     [HttpPost]
-    public IActionResult Criar(ContatoModel contato)
+    public async Task<IActionResult> Criar(ContatoModel contato)
     {
       if (ModelState.IsValid) 
       {
-        _contatoRepository.Adicionar(contato);
+        await _contatoRepository.AdicionarAsync(contato);
         return RedirectToAction("Index");
       }
        
