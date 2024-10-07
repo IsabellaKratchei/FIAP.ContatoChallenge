@@ -16,8 +16,9 @@ namespace FIAP.ContatoTechChallenge
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddEntityFrameworkSqlServer()
-                    .AddDbContext<BDContext>(o=> o.UseSqlServer(@"Server=BRUNO_PC\SQLEXPRESS;Database=FIAP;Trusted_Connection=True;TrustServerCertificate=true;"));
+                    .AddDbContext<BDContext>(o=> o.UseSqlServer(@"Server=DESKTOP-O0E2FJ0\SQLSERVER2022;Database=FIAP;Trusted_Connection=True;TrustServerCertificate=true;"));
             builder.Services.AddScoped<IContatoRepository, ContatoRepository>();
+            builder.Services.AddScoped<IRegiaoRepository, RegiaoRepository>();
 
             var app = builder.Build();
 

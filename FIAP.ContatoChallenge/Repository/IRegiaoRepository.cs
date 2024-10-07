@@ -4,6 +4,6 @@ namespace FIAP.ContatoChallenge.Repository
 {
   public interface IRegiaoRepository
   {
-    //RegiaoModel BuscarPorNum(int num);
+    Task<RegiaoModel> BuscarRegiaoPorDDDAsync(string ddd);
   }
 }

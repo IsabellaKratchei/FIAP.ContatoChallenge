@@ -4,19 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FIAP.ContatoChallenge.Repository
 {
-  public class RegiaoRepository : IRegiaoRepository
-  {
-      private readonly BDContext _bdContext;
+    public class RegiaoRepository : IRegiaoRepository
+    {
+        private readonly BDContext _bdContext;
 
-      public RegiaoRepository(BDContext bdContext)
-      {
-          this._bdContext = bdContext;
-      }
+        public RegiaoRepository(BDContext bdContext)
+        {
+            this._bdContext = bdContext;
+        }
 
-      //public RegiaoModel BuscarPorNum(int num)
-      //{
-      //    return _bdContext.DDDs.FirstOrDefault(x => x.DDD == num);
-      //}
-
-  }
+        public async Task<RegiaoModel> BuscarRegiaoPorDDDAsync(string ddd)
+        {
+            return await _bdContext.DDDs.FirstOrDefaultAsync(x => x.DDD == ddd);
+        }
+    }
 }

@@ -14,12 +14,5 @@ namespace FIAP.ContatoChallenge.Data
 
     public DbSet<RegiaoModel> DDDs { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            //modelBuilder.Entity<ContatoModel>()
-            //    .HasOne(c => c.DDD)
-            //    .WithMany(d => d.Contatos)
-            //    .HasForeignKey(c => c.DDDId);
-        }
   }
 }

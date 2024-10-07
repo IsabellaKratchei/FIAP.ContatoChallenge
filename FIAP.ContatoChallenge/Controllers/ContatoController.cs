@@ -4,60 +4,89 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FIAP.ContatoChallenge.Controllers
 {
-  public class ContatoController : Controller
-  {
-    private readonly IContatoRepository _contatoRepository;
+    public class ContatoController : Controller
+    {
+        private readonly IContatoRepository _contatoRepository;
 
-    public ContatoController(IContatoRepository contatoRepository)
-    {
-      _contatoRepository = contatoRepository;
-    }
+        public ContatoController(IContatoRepository contatoRepository)
+        {
+            _contatoRepository = contatoRepository;
+        }
 
-    public IActionResult Index()
-    {
-      List<ContatoModel> contatos = _contatoRepository.BuscarTodos();
-      return View(contatos);
-    }
-    public IActionResult Editar(int id)
-    {
-      ContatoModel contato = _contatoRepository.BuscarPorId(id);
-      return View(contato);
-    }
+        public async Task<IActionResult> Index()
+        {
+            List<ContatoModel> contatos = await _contatoRepository.BuscarTodosAsync();
+            return View(contatos);
+        }
 
-    [HttpPost]
-    public IActionResult Alterar(ContatoModel contato)
-    {
-      _contatoRepository.Editar(contato);
-      return RedirectToAction("Index");
-    }
+        public async Task<IActionResult> Editar(int id)
+        {
+            ContatoModel contato = await _contatoRepository.BuscarPorIdAsync(id);
 
-    public IActionResult Criar()
-    {
-      return View();
-    }
+            if (contato == null)
+            {
+                return NotFound();
+            }
+            return View(contato);
+        }
 
-    [HttpPost]
-    public async Task<IActionResult> Criar(ContatoModel contato)
-    {
-      if (ModelState.IsValid) 
-      {
-        await _contatoRepository.AdicionarAsync(contato);
-        return RedirectToAction("Index");
-      }
-       
-       return View(contato);
-    }
+        [HttpPost]
+        public async Task<IActionResult> Editar(ContatoModel contato)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _contatoRepository.EditarAsync(contato);
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                }
+            }
 
-    public IActionResult ApagarConfirmacao(int id)
-    {
-      ContatoModel contato = _contatoRepository.BuscarPorId(id);
-      return View(contato);
-    }
+            return View(contato);
+        }
 
-    public IActionResult Apagar(int id)
-    {
-      _contatoRepository.Apagar(id);
-      return RedirectToAction("Index");
+        public IActionResult Criar()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Criar(ContatoModel contato)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _contatoRepository.AdicionarAsync(contato);
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                }
+            }
+            return View(contato);
+        }
+
+        public async Task<IActionResult> ApagarConfirmacao(int id)
+        {
+            ContatoModel contato = await _contatoRepository.BuscarPorIdAsync(id);
+            if (contato == null)
+            {
+                return NotFound();
+            }
+            return View(contato);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Apagar(int id)
+        {
+            await _contatoRepository.ApagarAsync(id);
+            return RedirectToAction("Index");
+        }
     }
-  }
 }
