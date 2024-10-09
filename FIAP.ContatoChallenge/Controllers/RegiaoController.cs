@@ -4,19 +4,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FIAP.ContatoChallenge.Controllers
 {
-  public class RegiaoController : Controller
-  {
-    private readonly IRegiaoRepository _regiaoRepository;
-
-    public RegiaoController(IRegiaoRepository regiaoRepository)
+    public class RegiaoController : Controller
     {
-       _regiaoRepository = regiaoRepository;
-    }
+        private readonly IRegiaoRepository _regiaoRepository;
 
-    //public IActionResult BuscarDDD(int num)
-    //{
-    //  RegiaoModel ddd = _regiaoRepository.BuscarPorNum(num);
-    //  return View(ddd);
-    //}
-  }
+        public RegiaoController(IRegiaoRepository regiaoRepository)
+        {
+            _regiaoRepository = regiaoRepository;
+        }
+
+        //public async Task<IActionResult> BuscarPorDDDAsync()
+        //{
+        //    return View();
+        //}
+    }
 }

@@ -90,7 +90,7 @@ namespace FIAP.ContatoChallenge.Repository
                 contatoBD.Nome = contato.Nome;
                 contatoBD.Email = contato.Email;
                 contatoBD.DDD = contato.DDD;
-                contatoBD.Regiao = contato.Regiao;
+                contatoBD.Regiao = regiao.Regiao;
                 contatoBD.Telefone = contato.Telefone;
 
 
@@ -119,6 +119,13 @@ namespace FIAP.ContatoChallenge.Repository
             {
                 throw new Exception("Houve um erro ao apagar o contato:" + ex.Message);
             }
+        }
+
+        public async Task<List<ContatoModel>> BuscarPorDDDAsync(string ddd)
+        {
+            return await _bdContext.Contatos
+                .Where(c => c.DDD == ddd)
+                .ToListAsync();
         }
     }
 }
