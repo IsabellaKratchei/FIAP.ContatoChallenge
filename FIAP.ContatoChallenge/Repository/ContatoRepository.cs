@@ -57,7 +57,7 @@ namespace FIAP.ContatoChallenge.Repository
             }
             catch (Exception ex)
             {
-                throw new Exception("Houve um erro ao adicionar o contato: " + ex.Message);
+                throw new Exception("" + ex.Message);
             }
         }
 
