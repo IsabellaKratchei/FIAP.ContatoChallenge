@@ -121,29 +121,6 @@ namespace FIAP.ContatoChallenge.Testes
             Assert.That(result.Nome, Is.EqualTo("Contato Atualizado"));
         }
 
-        //[Test]
-        //public async Task ApagarAsync_ShouldRemoveContato_WhenExists()
-        //{
-        //    // Arrange
-        //    var contato = new ContatoModel
-        //    {
-        //        Nome = "Contato a Ser Removido",
-        //        Email = "contato.removido@example.com", // Adicionando email
-        //        Telefone = "3333-3333",
-        //        DDD = "31",
-        //        Regiao = "Sudeste" // Adicionando região
-        //    };
-
-        //    await _contatoRepository.AdicionarAsync(contato);
-
-        //    // Act
-        //    var result = await _contatoRepository.ApagarAsync(contato.Id);
-
-        //    // Assert
-        //    Assert.That(result, Is.True);
-        //    Assert.That((await _contatoRepository.BuscarTodosAsync()).Count, Is.EqualTo(0));
-        //}
-
         [Test]
         public async Task ApagarAsync_ShouldRemoveContato_WhenExists()
         {
