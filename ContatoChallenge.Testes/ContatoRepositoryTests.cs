@@ -257,5 +257,64 @@ namespace FIAP.ContatoChallenge.Testes
             // Assert
             Assert.That(result.Count, Is.EqualTo(2));
         }
+
+
+        /// <summary>
+        /// Validando regra de negócio
+        /// </summary>
+        /// <returns></returns>
+        [Test]
+        public async Task AdicionarAsync_DeveLancarExcecao_QuandoEmailInvalido()
+        {
+            // Arrange - Configurar o mock do repositório de regiões
+            var regiao11 = new RegiaoModel { DDD = "11", Regiao = "Sudeste" };
+
+            _regiaoRepositoryMock.Setup(repo => repo.BuscarRegiaoPorDDDAsync("11"))
+                .ReturnsAsync(regiao11);
+
+            var contato = new ContatoModel
+            {
+                Nome = "Novo Contato",
+                Email = "email-invalido", // Email inválido
+                Telefone = "1234-5678",
+                DDD = "11",
+                Regiao = "Sudeste"
+            };
+
+            // Act & Assert
+            var ex = Assert.ThrowsAsync<Exception>(async () => await _contatoRepository.AdicionarAsync(contato));
+            Assert.That(ex.Message, Is.EqualTo("O email informado nao é válido!"));
+        }
+
+        /// <summary>
+        /// teste de concorrência
+        /// </summary>
+        [Test]
+        public async Task ConsultasSimultaneas_DeveRetornarResultadosCorretamente()
+        {
+            // Arrange - Configurar o mock do repositório de regiões
+            var regiao11 = new RegiaoModel { DDD = "11", Regiao = "Sudeste" };
+            var regiao21 = new RegiaoModel { DDD = "21", Regiao = "Sudeste" };
+
+            _regiaoRepositoryMock.Setup(repo => repo.BuscarRegiaoPorDDDAsync("11"))
+                .ReturnsAsync(regiao11);
+            _regiaoRepositoryMock.Setup(repo => repo.BuscarRegiaoPorDDDAsync("21"))
+                .ReturnsAsync(regiao21);
+
+            // Arrange - Adicionar múltiplos contatos
+            await _contatoRepository.AdicionarAsync(new ContatoModel { Nome = "Contato 1",Email = "contato1@email.com", Telefone = "1111-1111", DDD = "11", Regiao = "Sudeste" });
+            await _contatoRepository.AdicionarAsync(new ContatoModel { Nome = "Contato 2", Email = "contato2@email.com", Telefone = "2222-2222", DDD = "21", Regiao = "Sudeste" });
+
+            // Act - Realizar múltiplas consultas simultaneamente
+            var tarefa1 = _contatoRepository.BuscarTodosAsync();
+            var tarefa2 = _contatoRepository.BuscarPorDDDAsync("11");
+
+            await Task.WhenAll(tarefa1, tarefa2);
+
+            // Assert - verificar se os resultados são os esperados
+            Assert.That(tarefa1.Result.Count, Is.EqualTo(2));
+            Assert.That(tarefa2.Result.Count, Is.EqualTo(1));
+        }
+
     }
 }

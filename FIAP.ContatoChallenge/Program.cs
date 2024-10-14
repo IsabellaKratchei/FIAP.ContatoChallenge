@@ -2,6 +2,9 @@ using FIAP.ContatoChallenge.Data;
 using FIAP.ContatoChallenge.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Prometheus;
+using Prometheus.SystemMetrics;
+using System.Diagnostics;
 
 namespace FIAP.ContatoTechChallenge
 {
@@ -19,6 +22,8 @@ namespace FIAP.ContatoTechChallenge
 
             ConfigureMiddleware(app);
 
+            _ = AtualizaUsoDeMemoria(); // Chama a função para atualizar as métricas de memória sem bloquear o restante do código
+
             app.Run();
         }
 
@@ -26,9 +31,11 @@ namespace FIAP.ContatoTechChallenge
         {
             builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
             builder.Services.AddEntityFrameworkSqlServer()
-                    .AddDbContext<BDContext>(o => o.UseSqlServer(@"Server=Bruno_PC\SQLEXPRESS;Database=FIAP;Trusted_Connection=True;TrustServerCertificate=true;"));
+                    //.AddDbContext<BDContext>(o => o.UseSqlServer(@"Server=Bruno_PC\SQLEXPRESS;Database=FIAP;Trusted_Connection=True;TrustServerCertificate=true;"));
+                    .AddDbContext<BDContext>(o => o.UseSqlServer(@"Server=DESKTOP-O0E2FJ0\SQLSERVER2022;Database=FIAP;Trusted_Connection=True;TrustServerCertificate=true;"));
             builder.Services.AddScoped<IContatoRepository, ContatoRepository>();
             builder.Services.AddScoped<IRegiaoRepository, RegiaoRepository>();
+            builder.Services.AddSystemMetrics();
         }
 
         private static async Task MigrateDatabaseAsync(WebApplication app)
@@ -103,9 +110,26 @@ namespace FIAP.ContatoTechChallenge
             app.UseRouting();
             app.UseAuthorization();
 
+            // Adiciona o middleware do Prometheus para expor as métricas
+            app.UseHttpMetrics(); // Adiciona métricas HTTP automáticas
+            app.UseMetricServer(); // Expondo métricas em "/metrics"
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+        }
+
+        private static async Task AtualizaUsoDeMemoria()
+        {
+            var memoryGauge = Metrics.CreateGauge("process_resident_memory_bytes", "Resident memory usage of the process in bytes.");
+
+            while (true)
+            {
+                var process = Process.GetCurrentProcess();
+                memoryGauge.Set(process.WorkingSet64); // Atualiza a métrica com o uso atual de memória
+                Console.WriteLine($"Atualizando memória residente: {process.WorkingSet64} bytes"); // Log para verificação
+                await Task.Delay(10000); // Atualiza a cada 10 segundos
+            }
         }
     }
 }

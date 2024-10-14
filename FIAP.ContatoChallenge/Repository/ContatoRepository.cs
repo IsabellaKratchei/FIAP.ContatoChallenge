@@ -31,6 +31,12 @@ namespace FIAP.ContatoChallenge.Repository
         {
             try
             {
+                // Verifica se o email é fornecido e se está no padrao de email (@)
+                if (string.IsNullOrWhiteSpace(contato.Email) || !contato.Email.Contains("@"))
+                {
+                    throw new Exception("O email informado nao é válido!");
+                }
+
                 // Verifica se o DDD é fornecido
                 if (string.IsNullOrEmpty(contato.DDD))
                 {
