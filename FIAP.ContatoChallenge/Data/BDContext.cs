@@ -12,7 +12,8 @@ namespace FIAP.ContatoChallenge.Data
 
     public DbSet<ContatoModel> Contatos { get; set; }
 
-    public DbSet<RegiaoModel> DDDs { get; set; }
+    //Remoçao da configuraçao de DDDs devido a utilizaçao da API própria de Regiao
+    //public DbSet<RegiaoModel> DDDs { get; set; }
 
   }
 }

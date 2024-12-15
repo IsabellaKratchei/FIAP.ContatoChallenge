@@ -1,7 +1,7 @@
 using FIAP.ContatoChallenge.Data;
 using FIAP.ContatoChallenge.Repository;
+using FIAP.ContatoChallenge.Service;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Prometheus;
 using Prometheus.SystemMetrics;
 using System.Diagnostics;
@@ -22,7 +22,7 @@ namespace FIAP.ContatoTechChallenge
 
             ConfigureMiddleware(app);
 
-            _ = AtualizaUsoDeMemoria(); // Chama a função para atualizar as métricas de memória sem bloquear o restante do código
+            _ = AtualizaUsoDeMemoria(); // Métrica de uso de memória
 
             app.Run();
         }
@@ -30,76 +30,72 @@ namespace FIAP.ContatoTechChallenge
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
             builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
+            // Banco de Dados
             builder.Services.AddEntityFrameworkSqlServer()
-                    //.AddDbContext<BDContext>(o => o.UseSqlServer(@"Server=Bruno_PC\SQLEXPRESS;Database=FIAP;Trusted_Connection=True;TrustServerCertificate=true;"));
-                    .AddDbContext<BDContext>(o => o.UseSqlServer(@"Server=DESKTOP-O0E2FJ0\SQLSERVER2022;Database=FIAP;Trusted_Connection=True;TrustServerCertificate=true;"));
+                .AddDbContext<BDContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // Repositórios
             builder.Services.AddScoped<IContatoRepository, ContatoRepository>();
-            builder.Services.AddScoped<IRegiaoRepository, RegiaoRepository>();
+
+            // Serviço HTTP para Regiões
+            builder.Services.AddHttpClient<IRegiaoRepository, RegiaoAPIClient>(client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration["ApiRegiao:BaseUrl"] ?? "https://localhost:7294/api/");
+            });
+
+            // Prometheus
             builder.Services.AddSystemMetrics();
+
+            // Swagger
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
         }
 
         private static async Task MigrateDatabaseAsync(WebApplication app)
         {
-            using (var scope = app.Services.CreateScope())
+            using var scope = app.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            var logger = services.GetRequiredService<ILogger<Program>>();
+
+            try
             {
-                var services = scope.ServiceProvider;
-                try
-                {
-                    var context = services.GetRequiredService<BDContext>();
-                    await GaranteCriacaoDatabaseAsync(context);
-                    await PopulaDDDSeVazioAsync(context);
-                }
-                catch (Exception ex)
-                {
-                    // Usar monitoramento de logs aqui, invés de WriteLine
-                    Console.WriteLine($"Erro ao verificar ou criar o banco de dados: {ex.Message}");
-                }
+                var context = services.GetRequiredService<BDContext>();
+                await GaranteCriacaoDatabaseAsync(context, logger);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro ao verificar ou criar o banco de dados.");
             }
         }
 
-        private static async Task GaranteCriacaoDatabaseAsync(BDContext context)
+        private static async Task GaranteCriacaoDatabaseAsync(BDContext context, ILogger logger)
         {
-            if (!context.Database.CanConnect())
+            if (!await context.Database.CanConnectAsync())
             {
-                Console.WriteLine("Banco de dados não encontrado, criando...");
-                context.Database.Migrate(); // Cria o banco e aplica as migrations
-                Console.WriteLine("Migration(s) aplicada(s) com sucesso.");
+                logger.LogInformation("Banco de dados não encontrado, criando...");
+                await context.Database.MigrateAsync();
+                logger.LogInformation("Migration(s) aplicada(s) com sucesso.");
             }
             else
             {
-                Console.WriteLine("Banco de dados encontrado.");
-            }
-        }
-
-        private static async Task PopulaDDDSeVazioAsync(BDContext context)
-        {
-            var existemRegistros = await context.DDDs.AnyAsync();
-
-            if (!existemRegistros)
-            {
-                var scriptPath = Path.Combine(Directory.GetCurrentDirectory(), "Scripts", "ScriptDDD.sql");
-                if (File.Exists(scriptPath))
-                {
-                    Console.WriteLine("Executando script para popular tabela de DDDs...");
-
-                    var scriptSql = await File.ReadAllTextAsync(scriptPath);
-                    await context.Database.ExecuteSqlRawAsync(scriptSql);
-                    Console.WriteLine("Tabela de DDDs populada com sucesso.");
-                }
-                else
-                {
-                    Console.WriteLine($"O arquivo de script '{scriptPath}' não foi encontrado.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Tabela de DDDs já está populada.");
+                logger.LogInformation("Banco de dados encontrado.");
             }
         }
 
         private static void ConfigureMiddleware(WebApplication app)
         {
-            if (!app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Contato API v1");
+                    c.RoutePrefix = "swagger"; // Swagger na raiz
+                });
+            }
+            else
             {
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
@@ -110,9 +106,9 @@ namespace FIAP.ContatoTechChallenge
             app.UseRouting();
             app.UseAuthorization();
 
-            // Adiciona o middleware do Prometheus para expor as métricas
-            app.UseHttpMetrics(); // Adiciona métricas HTTP automáticas
-            app.UseMetricServer(); // Expondo métricas em "/metrics"
+            // Prometheus
+            app.UseHttpMetrics();   // Métricas HTTP
+            app.UseMetricServer();  // Expondo métricas em "/metrics"
 
             app.MapControllerRoute(
                 name: "default",
@@ -126,9 +122,8 @@ namespace FIAP.ContatoTechChallenge
             while (true)
             {
                 var process = Process.GetCurrentProcess();
-                memoryGauge.Set(process.WorkingSet64); // Atualiza a métrica com o uso atual de memória
-                Console.WriteLine($"Atualizando memória residente: {process.WorkingSet64} bytes"); // Log para verificação
-                await Task.Delay(10000); // Atualiza a cada 10 segundos
+                memoryGauge.Set(process.WorkingSet64); // Métrica de memória
+                await Task.Delay(10000);              // Atualiza a cada 10 segundos
             }
         }
     }
