@@ -17,7 +17,8 @@
     </div>
 }
 
-<form asp-controller="Contato" asp-action="Editar" method="post" class="row g-3">
+<form asp-controller="Contato" asp-action="Editar" method="post" asp-route-id="@Model.Id" class="row g-3">
+    @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
 
     <div class="form-group col-md-12 mb-3">

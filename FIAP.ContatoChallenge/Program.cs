@@ -36,13 +36,15 @@ namespace FIAP.ContatoTechChallenge
                 .AddDbContext<BDContext>(options =>
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Repositórios
-            builder.Services.AddScoped<IContatoRepository, ContatoRepository>();
-
             // Serviço HTTP para Regiões
             builder.Services.AddHttpClient<IRegiaoRepository, RegiaoAPIClient>(client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration["ApiRegiao:BaseUrl"] ?? "https://localhost:7294/api/");
+            });
+
+            builder.Services.AddHttpClient<IContatoRepository, ContatoAPIClient>(client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration["ApiContato:BaseUrl"] ?? "https://localhost:7245/api/");
             });
 
             // Prometheus
@@ -51,6 +53,9 @@ namespace FIAP.ContatoTechChallenge
             // Swagger
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Logging.AddConsole();
+            builder.Logging.SetMinimumLevel(LogLevel.Debug);
         }
 
         private static async Task MigrateDatabaseAsync(WebApplication app)
@@ -113,6 +118,11 @@ namespace FIAP.ContatoTechChallenge
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers(); // Certifique-se de que os controllers estão sendo mapeados
+            });
         }
 
         private static async Task AtualizaUsoDeMemoria()

@@ -38,7 +38,6 @@ namespace ContatoChallenge.Testes
                 new ContatoModel { Id = 2, Nome = "Contato 2", Telefone = "2222-2222", DDD = "22" }
             };
 
-            // Certifique-se de que o nome do mock é o mesmo que no código do setup
             _contatoRepositoryMock.Setup(repo => repo.BuscarTodosAsync())
                 .ReturnsAsync(contatosMock);
 
@@ -189,7 +188,7 @@ namespace ContatoChallenge.Testes
             var _controller = new ContatoController(_contatoRepositoryMock.Object);
 
             // Simula o comportamento do método AdicionarAsync
-            _contatoRepositoryMock.Setup(repo => repo.AdicionarAsync(contato))
+            _contatoRepositoryMock.Setup(repo => repo.Criar(contato))
                 .ReturnsAsync(contato);
 
             // Act
@@ -201,7 +200,7 @@ namespace ContatoChallenge.Testes
             Assert.AreEqual("Index", redirectToActionResult.ActionName);
 
             // Verifique se o contato foi adicionado na lista de contatos
-            _contatoRepositoryMock.Verify(repo => repo.AdicionarAsync(contato), Times.Once);
+            _contatoRepositoryMock.Verify(repo => repo.Criar(contato), Times.Once);
         }
     }
 }

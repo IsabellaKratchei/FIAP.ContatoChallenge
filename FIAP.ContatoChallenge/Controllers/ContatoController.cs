@@ -13,6 +13,7 @@ namespace FIAP.ContatoChallenge.Controllers
             _contatoRepository = contatoRepository;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index(string ddd)
         {
             List<ContatoModel> contatos;
@@ -31,6 +32,7 @@ namespace FIAP.ContatoChallenge.Controllers
             return View(contatos);
         }
 
+        [HttpGet("Editar/{id}")]
         public async Task<IActionResult> Editar(int id)
         {
             ContatoModel contato = await _contatoRepository.BuscarPorIdAsync(id);
@@ -42,48 +44,71 @@ namespace FIAP.ContatoChallenge.Controllers
             return View(contato);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Editar(ContatoModel contato)
+        [HttpPut("Editar/{id}")]
+        public async Task<IActionResult> Editar(int id, ContatoModel contato)
         {
-            if (ModelState.IsValid)
+            if (id != contato.Id)
             {
-                try
-                {
-                    await _contatoRepository.EditarAsync(contato);
-                    return RedirectToAction("Index");
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", ex.Message);
-                }
+                return BadRequest("O ID informado não corresponde ao contato.");
             }
 
-            return View(contato);
+            if (!ModelState.IsValid)
+            {
+                return View(contato);
+            }
+
+            try
+            {
+                await _contatoRepository.Editar(contato);
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(contato);
+            }
         }
 
+        [HttpGet("Criar")]
         public IActionResult Criar()
         {
             return View();
         }
 
-        [HttpPost]
+        [HttpPost("Criar")]
         public async Task<IActionResult> Criar(ContatoModel contato)
         {
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
+            //{
+            //    try
+            //    {
+            //        await _contatoRepository.Criar(contato);
+            //        return RedirectToAction("Index");
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        ModelState.AddModelError("", ex.Message);
+            //    }
+            //}
+            //return View(contato);
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    await _contatoRepository.AdicionarAsync(contato);
-                    return RedirectToAction("Index");
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", ex.Message);
-                }
+                return View(contato);
             }
-            return View(contato);
+
+            try
+            {
+                await _contatoRepository.Criar(contato);
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(contato);
+            }
         }
 
+        [HttpGet("ApagarConfirmacao/{id}")]
         public async Task<IActionResult> ApagarConfirmacao(int id)
         {
             ContatoModel contato = await _contatoRepository.BuscarPorIdAsync(id);
@@ -94,7 +119,7 @@ namespace FIAP.ContatoChallenge.Controllers
             return View(contato);
         }
 
-        [HttpPost]
+        [HttpDelete("Apagar/{id}")]
         public async Task<IActionResult> Apagar(int id)
         {
             await _contatoRepository.ApagarAsync(id);
