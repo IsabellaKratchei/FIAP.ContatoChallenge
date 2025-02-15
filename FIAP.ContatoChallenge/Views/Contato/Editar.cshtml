@@ -17,7 +17,7 @@
     </div>
 }
 
-<form asp-controller="Contato" asp-action="Editar" method="post" asp-route-id="@Model.Id" class="row g-3">
+<form asp-controller="Contato" asp-action="Editar" method="post" class="row g-3">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
 
@@ -41,7 +41,7 @@
 
     <div class="form-group col-md-4 mb-3">
         <label asp-for="Telefone" class="form-label">Telefone</label>
-        <input asp-for="Telefone" class="form-control" placeholder="Ex: (XX)XXXXX-XXXX" maxlength="10" pattern="^\d{8,10}$" title="Por favor, insira entre 8 e 10 números">
+        <input asp-for="Telefone" class="form-control" placeholder="Ex: (XX)XXXXX-XXXX" maxlength="9" pattern="^\d{8,10}$" title="Por favor, insira entre 8 e 10 números">
         @Html.ValidationMessageFor(x => x.Telefone, "", new { @class = "text-danger" })
     </div>
 

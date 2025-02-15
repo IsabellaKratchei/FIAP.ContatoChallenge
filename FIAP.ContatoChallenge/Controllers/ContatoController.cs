@@ -44,7 +44,7 @@ namespace FIAP.ContatoChallenge.Controllers
             return View(contato);
         }
 
-        [HttpPut("Editar/{id}")]
+        [HttpPost("Editar/{id}")]
         public async Task<IActionResult> Editar(int id, ContatoModel contato)
         {
             if (id != contato.Id)
@@ -78,19 +78,6 @@ namespace FIAP.ContatoChallenge.Controllers
         [HttpPost("Criar")]
         public async Task<IActionResult> Criar(ContatoModel contato)
         {
-            //if (ModelState.IsValid)
-            //{
-            //    try
-            //    {
-            //        await _contatoRepository.Criar(contato);
-            //        return RedirectToAction("Index");
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        ModelState.AddModelError("", ex.Message);
-            //    }
-            //}
-            //return View(contato);
             if (!ModelState.IsValid)
             {
                 return View(contato);
@@ -119,11 +106,28 @@ namespace FIAP.ContatoChallenge.Controllers
             return View(contato);
         }
 
-        [HttpDelete("Apagar/{id}")]
+        [HttpPost("Apagar/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Apagar(int id)
         {
-            await _contatoRepository.ApagarAsync(id);
-            return RedirectToAction("Index");
+            try
+            {
+                var resultado = await _contatoRepository.ApagarAsync(id);
+                if (resultado)
+                {
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Não foi possível excluir o contato.");
+                    return RedirectToAction("Index");
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Ocorreu um erro ao excluir o contato: " + ex.Message);
+                return RedirectToAction("Index");
+            }
         }
     }
 }

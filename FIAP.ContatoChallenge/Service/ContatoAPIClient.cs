@@ -40,7 +40,14 @@ namespace FIAP.ContatoChallenge.Service
 
         public async Task<bool> ApagarAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"Contato/{id}");
+            var response = await _httpClient.DeleteAsync($"Contato/Apagar/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Erro ao excluir contato: {response.StatusCode}, Detalhes: {errorContent}");
+            }
+
             return response.IsSuccessStatusCode;
         }
 
@@ -60,12 +67,19 @@ namespace FIAP.ContatoChallenge.Service
 
         public async Task<List<ContatoModel>> BuscarTodosAsync()
         {
-            var response = await _httpClient.GetAsync("Contato");
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<List<ContatoModel>>();
+            try
+            {
+                var response = await _httpClient.GetAsync("Contato");
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<List<ContatoModel>>();
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new Exception($"Erro ao buscar contatos: {ex.Message}");
+            }
         }
 
-        [HttpPut]
+        [HttpPost]
         public async Task<ContatoModel> Editar(ContatoModel contato)
         {
             var regiao = await _regiaoRepository.BuscarRegiaoPorDDDAsync(contato.DDD);
@@ -76,7 +90,7 @@ namespace FIAP.ContatoChallenge.Service
 
             contato.Regiao = regiao.Regiao;
 
-            var response = await _httpClient.PutAsJsonAsync($"Editar/{contato.Id}", contato);
+            var response = await _httpClient.PostAsJsonAsync($"Contato/Editar/{contato.Id}", contato);
 
             if (!response.IsSuccessStatusCode)
             {

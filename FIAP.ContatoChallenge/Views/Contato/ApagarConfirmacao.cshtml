@@ -6,9 +6,18 @@
 <div class="text-center">
     <h3>Realmente deseja apagar o contato (@Model.Nome)?</h3>
     <br />
+    <form asp-controller="Contato" asp-route-id="@Model.Id" asp-action="Apagar" method="post">
+        <input type="hidden" asp-for="Id" /> <!-- Use asp-for para vincular o ID -->
+        <button type="submit" class="btn btn-danger">Confirmar exclusão</button>
+        <a class="btn btn-primary" role="button" asp-controller="Contato" asp-action="Index">Cancelar exclusão</a>
+    </form>
+</div>
+@* <div class="text-center">
+    <h3>Realmente deseja apagar o contato (@Model.Nome)?</h3>
+    <br />
     <form asp-action="Apagar" method="post">
         <input type="hidden" name="id" value="@Model.Id" />
         <button type="submit" class="btn btn-danger">Confirmar exclusão</button>
         <a class="btn btn-primary" role="button" asp-controller="Contato" asp-action="Index">Cancelar exclusão</a>
     </form>
-</div>
+</div> *@
