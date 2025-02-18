@@ -1,0 +1,34 @@
+﻿# services:
+#   contato_challenge:
+#     container_name: FIAP.ContatoChallenge
+#     image: fiapcontatochallenge:dev
+#     ports:
+#       - "32799"   Mapeando a porta 80 do container para a 32784 no host
+#     environment:
+#       - ApiRegiao__BaseUrl=http://api_regiao/api/  Variável de ambiente para acessar a API de Região
+#       - ApiContato__BaseUrl=http://api_contato/api/  Variável de ambiente para acessar a API de Contato
+#     depends_on:
+#       - api_regiao
+#       - api_contato
+#     networks:
+#       - fiap_network
+
+#   api_contato:
+#     container_name: FIAP.APIContato
+#     image: fiapapicontato:dev
+#     ports:
+#       - "32793"   Mapeando a porta 80 do container para a 32786 no host
+#     networks:
+#       - fiap_network
+
+#   api_regiao:
+#     container_name: FIAP.APIRegiao
+#     image: fiapapiregiao:dev
+#     ports:
+#       - "32791"   Mapeando a porta 80 do container para a 32787 no host
+#     networks:
+#       - fiap_network
+
+# networks:
+#   fiap_network:
+#     driver: bridge
